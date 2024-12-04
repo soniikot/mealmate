@@ -56,7 +56,7 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   const handleDishSelect = async (dishName: string) => {
     if (!selectedDay || !selectedMealType || !mealPlan) return;
 
-    const updatedMeals = [...(mealPlan.meals || [])];
+    const updatedMeals = mealPlan.meals ? [...mealPlan.meals] : [];
     const dayIndex = updatedMeals.findIndex((meal) => meal.day === selectedDay);
 
     if (dayIndex === -1) {
@@ -64,24 +64,21 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
         day: selectedDay,
         breakfast: selectedMealType === "breakfast" ? dishName : "",
         lunch: selectedMealType === "lunch" ? dishName : "",
-        dinner: selectedMealType === "dinner" ? dishName : "",
+        dinner: selectedMealType === "dinner" ? dishName : ""
       });
     } else {
       updatedMeals[dayIndex] = {
         ...updatedMeals[dayIndex],
-        [selectedMealType]: dishName,
+        [selectedMealType]: dishName
       };
     }
 
     try {
-      const updatedMealPlan = {
+      await updateMealPlan({
         ...mealPlan,
-        meals: updatedMeals,
-        shopping_list: mealPlan.shopping_list || [],
-      };
-
-      await updateMealPlan(updatedMealPlan);
-      await queryClient.invalidateQueries({ queryKey: ["mealPlan"] });
+        meals: updatedMeals
+      });
+      await queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
       setIsModalOpen(false);
     } catch (error) {
       console.error("Failed to update meal plan:", error);
@@ -91,8 +88,7 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   return (
     <div className="space-y-4">
       {days.map((day) => {
-        const meals = mealPlan?.meals as MealDay[] | undefined;
-        const dayMeals = meals?.find((meal) => meal.day === day);
+        const dayMeals = mealPlan?.meals?.find((meal) => meal.day === day);
 
         return (
           <Card key={day} className="p-4">
@@ -113,7 +109,7 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <p>{dayMeals?.breakfast || "Not planned"}</p>
+                <p className="text-sm">{dayMeals?.breakfast || "Not planned"}</p>
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -126,7 +122,7 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <p>{dayMeals?.lunch || "Not planned"}</p>
+                <p className="text-sm">{dayMeals?.lunch || "Not planned"}</p>
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -139,7 +135,7 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <p>{dayMeals?.dinner || "Not planned"}</p>
+                <p className="text-sm">{dayMeals?.dinner || "Not planned"}</p>
               </div>
             </div>
           </Card>
