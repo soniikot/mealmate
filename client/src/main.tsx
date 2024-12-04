@@ -7,6 +7,7 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import Dashboard from "./pages/Dashboard";
 import Preferences from "./pages/Preferences";
+import { PreferencesProvider } from "./context/PreferencesContext";
 
 function Router() {
   return (
@@ -21,8 +22,10 @@ function Router() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <PreferencesProvider>
+        <Router />
+        <Toaster />
+      </PreferencesProvider>
     </QueryClientProvider>
   </StrictMode>,
 );

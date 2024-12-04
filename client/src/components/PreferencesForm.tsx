@@ -1,49 +1,35 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { insertPreferencesSchema, type Preferences } from "@db/schema";
-import { fetchPreferences, updatePreferences } from "../lib/api";
+import { usePreferences } from "../context/PreferencesContext";
 
 export default function PreferencesForm() {
   const { toast } = useToast();
-  
-  const { data: existingPreferences } = useQuery({
-    queryKey: ["preferences"],
-    queryFn: fetchPreferences
-  });
-
+  const { preferences, dispatch } = usePreferences();
   const defaultArrayValue = [] as string[];
+
   const form = useForm<Preferences>({
     resolver: zodResolver(insertPreferencesSchema),
-    defaultValues: {
-      dietary_restrictions: existingPreferences?.dietary_restrictions ?? defaultArrayValue,
-      allergies: existingPreferences?.allergies ?? defaultArrayValue,
-      cuisine_preferences: existingPreferences?.cuisine_preferences ?? defaultArrayValue,
-      is_vegetarian: existingPreferences?.is_vegetarian ?? false,
-      is_vegan: existingPreferences?.is_vegan ?? false,
-      is_gluten_free: existingPreferences?.is_gluten_free ?? false,
-      servings: existingPreferences?.servings ?? 2
-    }
+    defaultValues: preferences
   });
 
-  const mutation = useMutation({
-    mutationFn: updatePreferences,
-    onSuccess: () => {
-      toast({
-        title: "Preferences updated",
-        description: "Your meal preferences have been saved successfully."
-      });
-    }
-  });
+  const onSubmit = (data: Preferences) => {
+    dispatch({ type: "SET_PREFERENCES", payload: data });
+    toast({
+      title: "Preferences updated",
+      description: "Your meal preferences have been saved successfully."
+    });
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="is_vegetarian"

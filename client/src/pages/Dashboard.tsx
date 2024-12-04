@@ -8,8 +8,9 @@ import ShoppingList from "../components/ShoppingList";
 import { fetchCurrentMealPlan } from "../lib/api";
 
 export default function Dashboard() {
+  const { preferences } = usePreferences();
   const { data: mealPlan, isLoading } = useQuery({
-    queryKey: ["mealPlan"],
+    queryKey: ["mealPlan", preferences],
     queryFn: fetchCurrentMealPlan
   });
 

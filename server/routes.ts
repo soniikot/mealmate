@@ -53,35 +53,8 @@ export function registerRoutes(app: Express) {
     });
   });
 
-  // Protected routes
-  app.use("/api/preferences", requireAuth);
+  // Meal plan routes still require auth
   app.use("/api/meal-plan", requireAuth);
-  app.get("/api/preferences", async (req: Request, res) => {
-    if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
-    
-    const userPreferences = await db.query.preferences.findFirst({
-      where: eq(preferences.user_id, req.user.id)
-    });
-    
-    res.json(userPreferences);
-  });
-
-  app.post("/api/preferences", async (req: Request, res) => {
-    if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
-    
-    const userPreferences = await db.insert(preferences)
-      .values({
-        ...req.body,
-        user_id: req.user.id
-      })
-      .onConflictDoUpdate({
-        target: [preferences.user_id],
-        set: req.body
-      })
-      .returning();
-    
-    res.json(userPreferences[0]);
-  });
 
   app.get("/api/meal-plan", async (req: Request, res) => {
     if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
