@@ -53,18 +53,12 @@ export function registerRoutes(app: Express) {
     });
   });
 
-  // Meal plan routes still require auth
-  app.use("/api/meal-plan", requireAuth);
-
-  app.get("/api/meal-plan", async (req: Request, res) => {
-    if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
-    
+  app.get("/api/meal-plan", async (_req: Request, res) => {
     const currentWeekStart = new Date();
     currentWeekStart.setHours(0, 0, 0, 0);
     currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
 
     const mealPlan = await db.query.mealPlans.findFirst({
-      where: eq(mealPlans.user_id, req.user.id),
       orderBy: (mealPlans, { desc }) => [desc(mealPlans.week_start)]
     });
     
@@ -72,10 +66,9 @@ export function registerRoutes(app: Express) {
   });
 
   app.post("/api/meal-plan/generate", async (req: Request, res) => {
-    if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
     
     const userPreferences = await db.query.preferences.findFirst({
-      where: eq(preferences.user_id, req.user.id)
+      where: eq(preferences.user_id, req.user?.id)
     });
 
     if (!userPreferences) {
@@ -85,7 +78,7 @@ export function registerRoutes(app: Express) {
     const mealPlan = await generateMealPlanWithGPT(userPreferences);
     
     const newMealPlan = {
-      user_id: req.user.id,
+      user_id: req.user?.id,
       week_start: new Date(),
       meals: (mealPlan.meals || []) as {
         day: string;

@@ -14,16 +14,15 @@ export default function PreferencesForm() {
   const { preferences, dispatch } = usePreferences();
   const defaultArrayValue = [] as string[];
 
-  const form = useForm<Preferences>({
-    resolver: zodResolver(insertPreferencesSchema),
+  const form = useForm({
     defaultValues: {
-      dietary_restrictions: preferences.dietary_restrictions || defaultArrayValue,
-      allergies: preferences.allergies || defaultArrayValue,
-      cuisine_preferences: preferences.cuisine_preferences || defaultArrayValue,
-      is_vegetarian: Boolean(preferences.is_vegetarian),
-      is_vegan: Boolean(preferences.is_vegan),
-      is_gluten_free: Boolean(preferences.is_gluten_free),
-      servings: preferences.servings || 2
+      dietary_restrictions: [],
+      allergies: [],
+      cuisine_preferences: [],
+      is_vegetarian: false,
+      is_vegan: false,
+      is_gluten_free: false,
+      servings: 2
     }
   });
 

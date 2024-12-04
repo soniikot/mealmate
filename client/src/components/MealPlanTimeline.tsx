@@ -11,14 +11,14 @@ interface MealPlanTimelineProps {
   mealPlan?: MealPlan;
 }
 
-interface MealDay {
+type MealDay = {
   day: string;
   breakfast: string;
   lunch: string;
   dinner: string;
-}
+};
 
-export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
+export default function MealPlanTimeline({ mealPlan }: { mealPlan?: { meals: MealDay[] } }) {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const queryClient = useQueryClient();
   
