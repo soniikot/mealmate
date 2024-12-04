@@ -120,11 +120,17 @@ export function registerRoutes(app: Express) {
       const { mealType } = req.params;
       const userPreferences = await db.query.preferences.findFirst();
       
-      if (!userPreferences) {
-        return res.status(400).json({ error: "Please set your preferences first" });
-      }
-
-      const recipes = await generateRecipes(mealType, userPreferences);
+      // Use default preferences if none are set
+      const defaultPreferences = {
+        is_vegetarian: false,
+        is_vegan: false,
+        is_gluten_free: false,
+        dietary_restrictions: [],
+        allergies: [],
+        servings: 2
+      };
+      
+      const recipes = await generateRecipes(mealType, userPreferences || defaultPreferences);
       res.json(recipes);
     } catch (error) {
       console.error("Error fetching recipes:", error);

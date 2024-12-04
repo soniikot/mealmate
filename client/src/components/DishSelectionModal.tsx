@@ -19,16 +19,24 @@ export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType
   const [recipes, setRecipes] = useState<Partial<Recipe>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchRecipes = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         const response = await fetch(`/api/recipes/${mealType}`);
-        if (!response.ok) throw new Error("Failed to fetch recipes");
         const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch recipes");
+        }
+        
         setRecipes(data);
       } catch (error) {
         console.error("Error fetching recipes:", error);
+        setError(error.message);
       } finally {
         setIsLoading(false);
       }
@@ -77,7 +85,14 @@ export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType
         </div>
 
         <div className="grid grid-cols-2 gap-4 my-4 max-h-[400px] overflow-y-auto">
-          {isLoading ? (
+          {error ? (
+            <div className="col-span-2 text-center py-4 text-red-500">
+              {error}
+              <Link href="/preferences" className="block mt-2 text-primary hover:underline">
+                Update Preferences
+              </Link>
+            </div>
+          ) : isLoading ? (
             <div className="col-span-2 text-center py-8">Loading recipes...</div>
           ) : filteredRecipes.length === 0 ? (
             <div className="col-span-2 text-center py-8">No recipes found</div>
