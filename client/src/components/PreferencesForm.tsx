@@ -14,9 +14,17 @@ export default function PreferencesForm() {
   const { preferences, dispatch } = usePreferences();
   const defaultArrayValue = [] as string[];
 
-  const form = useForm<Partial<Preferences>>({
-    resolver: zodResolver(insertPreferencesSchema.partial()),
-    defaultValues: preferences
+  const form = useForm<Preferences>({
+    resolver: zodResolver(insertPreferencesSchema),
+    defaultValues: {
+      dietary_restrictions: preferences.dietary_restrictions || defaultArrayValue,
+      allergies: preferences.allergies || defaultArrayValue,
+      cuisine_preferences: preferences.cuisine_preferences || defaultArrayValue,
+      is_vegetarian: Boolean(preferences.is_vegetarian),
+      is_vegan: Boolean(preferences.is_vegan),
+      is_gluten_free: Boolean(preferences.is_gluten_free),
+      servings: preferences.servings || 2
+    }
   });
 
   const onSubmit = (data: Partial<Preferences>) => {

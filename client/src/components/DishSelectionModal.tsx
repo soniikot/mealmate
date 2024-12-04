@@ -41,14 +41,14 @@ const mockRecipes: Partial<Recipe>[] = [
 
 export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType }: DishSelectionModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDish, setSelectedDish] = useState<Recipe | null>(null);
+  const [selectedDish, setSelectedDish] = useState<Partial<Recipe> | null>(null);
 
   const filteredRecipes = mockRecipes.filter(recipe =>
-    recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+    recipe.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false
   );
 
   const handleSelect = () => {
-    if (selectedDish) {
+    if (selectedDish?.name) {
       onSelect(selectedDish.name);
       onClose();
     }
