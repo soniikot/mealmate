@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import type { MealPlan } from "@db/schema";
 import DishSelectionModal from "./DishSelectionModal";
 import { updateMealPlan } from "../lib/api";
@@ -115,8 +115,31 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
     }
   };
 
+  const handleClearMealPlan = async () => {
+    try {
+      await updateMealPlan({
+        meals: [],
+        shopping_list: []
+      });
+      await queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
+    } catch (error) {
+      console.error("Failed to clear meal plan:", error);
+    }
+  };
+
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">This Week's Meal Plan</h2>
+        <Button 
+          variant="destructive"
+          onClick={handleClearMealPlan}
+          className="flex items-center gap-2"
+        >
+          <Trash2 className="h-4 w-4" />
+          Clear Meal Plan
+        </Button>
+      </div>
       {days.map((day) => {
         const dayMeals = mealPlan?.meals?.find((meal) => meal.day === day);
         console.log('Day meals for', day, ':', dayMeals);
