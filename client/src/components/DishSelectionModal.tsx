@@ -48,12 +48,11 @@ export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType
   );
 
   const handleSelect = () => {
-    if (selectedDish?.name) {
-      onSelect(selectedDish.name);
-      setSelectedDish(null);
-      setSearchTerm("");
-      onClose();
-    }
+    if (!selectedDish?.name) return;
+    onSelect(selectedDish.name);
+    setSelectedDish(null);
+    setSearchTerm("");
+    onClose();
   };
 
   return (
@@ -80,8 +79,8 @@ export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType
           {filteredRecipes.map((recipe) => (
             <Card
               key={recipe.id}
-              className={`cursor-pointer transition-colors ${
-                selectedDish?.id === recipe.id ? 'border-primary' : ''
+              className={`cursor-pointer transition-colors hover:border-primary ${
+                selectedDish?.id === recipe.id ? 'border-2 border-primary' : ''
               }`}
               onClick={() => setSelectedDish(recipe)}
             >
@@ -102,7 +101,14 @@ export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSelect} disabled={!selectedDish}>Confirm</Button>
+          <Button 
+            onClick={handleSelect} 
+            disabled={!selectedDish}
+            variant="default"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Confirm
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
