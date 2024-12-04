@@ -1,5 +1,11 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import type { MealPlan } from "@db/schema";
+import DishSelectionModal from "./DishSelectionModal";
+import { updateMealPlan } from "../lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface MealPlanTimelineProps {
   mealPlan?: MealPlan;
@@ -14,6 +20,45 @@ interface MealDay {
 
 export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const queryClient = useQueryClient();
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedMealType, setSelectedMealType] = useState<"breakfast" | "lunch" | "dinner" | null>(null);
+
+  const handleAddDish = (day: string, mealType: "breakfast" | "lunch" | "dinner") => {
+    setSelectedDay(day);
+    setSelectedMealType(mealType);
+    setIsModalOpen(true);
+  };
+
+  const handleDishSelect = async (dishName: string) => {
+    if (!selectedDay || !selectedMealType || !mealPlan) return;
+
+    const updatedMeals = [...(mealPlan.meals as MealDay[] || [])];
+    const dayIndex = updatedMeals.findIndex(meal => meal.day === selectedDay);
+
+    if (dayIndex === -1) {
+      updatedMeals.push({
+        day: selectedDay,
+        breakfast: selectedMealType === "breakfast" ? dishName : "",
+        lunch: selectedMealType === "lunch" ? dishName : "",
+        dinner: selectedMealType === "dinner" ? dishName : ""
+      });
+    } else {
+      updatedMeals[dayIndex] = {
+        ...updatedMeals[dayIndex],
+        [selectedMealType]: dishName
+      };
+    }
+
+    try {
+      await updateMealPlan({ ...mealPlan, meals: updatedMeals });
+      queryClient.invalidateQueries(["mealPlan"]);
+    } catch (error) {
+      console.error("Failed to update meal plan:", error);
+    }
+  };
   
   return (
     <div className="space-y-4">
@@ -28,21 +73,55 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
             </div>
             <div className="grid grid-cols-3 gap-4 mt-3">
               <div>
-                <span className="text-sm text-muted-foreground">Breakfast</span>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-muted-foreground">Breakfast</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleAddDish(day, "breakfast")}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
                 <p>{dayMeals?.breakfast || "Not planned"}</p>
               </div>
               <div>
-                <span className="text-sm text-muted-foreground">Lunch</span>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-muted-foreground">Lunch</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleAddDish(day, "lunch")}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
                 <p>{dayMeals?.lunch || "Not planned"}</p>
               </div>
               <div>
-                <span className="text-sm text-muted-foreground">Dinner</span>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-muted-foreground">Dinner</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleAddDish(day, "dinner")}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
                 <p>{dayMeals?.dinner || "Not planned"}</p>
               </div>
             </div>
           </Card>
         );
       })}
+      
+      <DishSelectionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelect={handleDishSelect}
+        mealType={selectedMealType || "breakfast"}
+      />
     </div>
   );
 }
