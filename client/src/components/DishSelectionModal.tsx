@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
+import { Link } from "wouter";
 import type { Recipe } from "@db/schema";
 
 interface DishSelectionModalProps {
@@ -36,7 +37,7 @@ export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType
         setRecipes(data);
       } catch (error) {
         console.error("Error fetching recipes:", error);
-        setError(error.message);
+        setError(error instanceof Error ? error.message : "Failed to fetch recipes");
       } finally {
         setIsLoading(false);
       }
