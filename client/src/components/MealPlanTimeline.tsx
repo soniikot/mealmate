@@ -54,17 +54,16 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   };
 
   const handleDishSelect = async (dishName: string) => {
-    if (!selectedDay || !selectedMealType || !mealPlan) return;
+    if (!selectedDay || !selectedMealType) return;
 
-    console.log('Selected dish:', dishName);
-    console.log('Current mealPlan:', mealPlan);
+    const currentMeals = mealPlan?.meals || [];
+    console.log('Current meals:', currentMeals);
 
-    const updatedMeals = mealPlan.meals ? [...mealPlan.meals] : [];
+    const updatedMeals = [...currentMeals];
     const dayIndex = updatedMeals.findIndex((meal) => meal.day === selectedDay);
     
-    console.log('Updated meals before update:', updatedMeals);
-
     if (dayIndex === -1) {
+      // Create new day entry
       updatedMeals.push({
         day: selectedDay,
         breakfast: selectedMealType === "breakfast" ? dishName : "",
@@ -72,18 +71,21 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
         dinner: selectedMealType === "dinner" ? dishName : ""
       });
     } else {
+      // Update existing day
       updatedMeals[dayIndex] = {
         ...updatedMeals[dayIndex],
         [selectedMealType]: dishName
       };
     }
 
+    console.log('Updated meals:', updatedMeals);
+
     try {
       const updatedMealPlan = await updateMealPlan({
-        ...mealPlan,
-        meals: updatedMeals
+        meals: updatedMeals,
+        shopping_list: mealPlan?.shopping_list || []
       });
-      console.log('Meal plan update response:', updatedMealPlan);
+      console.log('Server response:', updatedMealPlan);
       await queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
       setIsModalOpen(false);
     } catch (error) {

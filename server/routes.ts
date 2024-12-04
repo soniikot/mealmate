@@ -83,26 +83,27 @@ export function registerRoutes(app: Express) {
         orderBy: (mealPlans, { desc }) => [desc(mealPlans.week_start)]
       });
 
+      // Ensure meals array is properly initialized
+      const meals = Array.isArray(mealPlanData.meals) ? mealPlanData.meals : [];
+      
       if (existingMealPlan) {
-        // Update existing meal plan
         const [updatedMealPlan] = await db
           .update(mealPlans)
           .set({
-            meals: mealPlanData.meals,
-            shopping_list: mealPlanData.shopping_list
+            meals: meals,
+            shopping_list: mealPlanData.shopping_list || []
           })
           .where(eq(mealPlans.id, existingMealPlan.id))
           .returning();
         
         res.json(updatedMealPlan);
       } else {
-        // Create new meal plan if none exists
         const [newMealPlan] = await db
           .insert(mealPlans)
           .values({
             week_start: new Date(),
-            meals: mealPlanData.meals,
-            shopping_list: mealPlanData.shopping_list
+            meals: meals,
+            shopping_list: mealPlanData.shopping_list || []
           })
           .returning();
         
