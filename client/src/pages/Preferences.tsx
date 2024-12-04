@@ -1,4 +1,6 @@
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 import PreferencesForm from "../components/PreferencesForm";
 
 export default function Preferences() {
@@ -17,6 +19,11 @@ export default function Preferences() {
         </div>
 
         <Card className="p-6">
+          <Link href="/">
+            <Button variant="ghost" className="mb-4">
+              ← Back to Dashboard
+            </Button>
+          </Link>
           <PreferencesForm />
         </Card>
       </div>
