@@ -68,7 +68,7 @@ export default function Dashboard() {
             {isLoading ? (
               <div>Loading...</div>
             ) : (
-              <ShoppingList items={mealPlan?.shopping_list || []} />
+              <ShoppingList items={mealPlan?.shopping_list as Array<{ item: string; category: string; quantity: number; unit: string; }> || []} />
             )}
           </Card>
         </div>

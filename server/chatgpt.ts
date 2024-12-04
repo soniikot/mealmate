@@ -3,14 +3,24 @@ import type { Preferences, MealPlan } from "@db/schema";
 const OPENAI_API_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
 export async function generateMealPlanWithGPT(preferences: Preferences): Promise<Partial<MealPlan>> {
+  const dietaryRestrictions = Array.isArray(preferences.dietary_restrictions) 
+    ? preferences.dietary_restrictions.join(", ")
+    : "";
+  const allergies = Array.isArray(preferences.allergies)
+    ? preferences.allergies.join(", ")
+    : "";
+  const cuisinePreferences = Array.isArray(preferences.cuisine_preferences)
+    ? preferences.cuisine_preferences.join(", ")
+    : "";
+
   const prompt = `
     Generate a weekly meal plan for someone with the following preferences:
     - Vegetarian: ${preferences.is_vegetarian}
     - Vegan: ${preferences.is_vegan}
     - Gluten Free: ${preferences.is_gluten_free}
-    - Dietary Restrictions: ${preferences.dietary_restrictions?.join(", ")}
-    - Allergies: ${preferences.allergies?.join(", ")}
-    - Cuisine Preferences: ${preferences.cuisine_preferences?.join(", ")}
+    - Dietary Restrictions: ${dietaryRestrictions}
+    - Allergies: ${allergies}
+    - Cuisine Preferences: ${cuisinePreferences}
     - Servings: ${preferences.servings}
 
     Include 3 meals per day (breakfast, lunch, dinner) for 7 days.

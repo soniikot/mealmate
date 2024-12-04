@@ -1,17 +1,19 @@
 import { Check, ShoppingBasket } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
+interface ShoppingItem {
+  item: string;
+  category: string;
+  quantity: number;
+  unit: string;
+}
+
 interface ShoppingListProps {
-  items: Array<{
-    item: string;
-    category: string;
-    quantity: number;
-    unit: string;
-  }>;
+  items: ShoppingItem[];
 }
 
 export default function ShoppingList({ items }: ShoppingListProps) {
-  const categories = [...new Set(items.map(item => item.category))];
+  const categories = Array.from(new Set(items.map(item => item.category)));
 
   return (
     <div>
@@ -29,9 +31,9 @@ export default function ShoppingList({ items }: ShoppingListProps) {
                 {items
                   .filter(item => item.category === category)
                   .map((item, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Checkbox id={`item-${index}`} />
-                      <label htmlFor={`item-${index}`} className="flex-1">
+                    <div key={`${category}-${index}`} className="flex items-center gap-2">
+                      <Checkbox id={`item-${category}-${index}`} />
+                      <label htmlFor={`item-${category}-${index}`} className="flex-1">
                         {item.quantity} {item.unit} {item.item}
                       </label>
                     </div>

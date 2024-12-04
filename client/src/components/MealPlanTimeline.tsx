@@ -5,13 +5,21 @@ interface MealPlanTimelineProps {
   mealPlan?: MealPlan;
 }
 
+interface MealDay {
+  day: string;
+  breakfast: string;
+  lunch: string;
+  dinner: string;
+}
+
 export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   
   return (
     <div className="space-y-4">
       {days.map((day) => {
-        const dayMeals = mealPlan?.meals.find(m => m.day === day);
+        const meals = mealPlan?.meals as MealDay[] | undefined;
+        const dayMeals = meals?.find((meal) => meal.day === day);
         
         return (
           <Card key={day} className="p-4">

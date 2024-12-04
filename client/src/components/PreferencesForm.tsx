@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { insertPreferencesSchema } from "@db/schema";
+import { insertPreferencesSchema, type Preferences } from "@db/schema";
 import { fetchPreferences, updatePreferences } from "../lib/api";
 
 export default function PreferencesForm() {
@@ -17,16 +17,16 @@ export default function PreferencesForm() {
     queryFn: fetchPreferences
   });
 
-  const form = useForm({
+  const form = useForm<Preferences>({
     resolver: zodResolver(insertPreferencesSchema),
-    defaultValues: existingPreferences || {
-      dietary_restrictions: [],
-      allergies: [],
-      cuisine_preferences: [],
-      is_vegetarian: false,
-      is_vegan: false,
-      is_gluten_free: false,
-      servings: 2
+    defaultValues: {
+      dietary_restrictions: existingPreferences?.dietary_restrictions as string[] ?? [],
+      allergies: existingPreferences?.allergies as string[] ?? [],
+      cuisine_preferences: existingPreferences?.cuisine_preferences as string[] ?? [],
+      is_vegetarian: existingPreferences?.is_vegetarian ?? false,
+      is_vegan: existingPreferences?.is_vegan ?? false,
+      is_gluten_free: existingPreferences?.is_gluten_free ?? false,
+      servings: existingPreferences?.servings ?? 2
     }
   });
 
@@ -50,7 +50,7 @@ export default function PreferencesForm() {
             <FormItem className="flex items-center gap-2">
               <FormControl>
                 <Checkbox 
-                  checked={field.value} 
+                  checked={field.value as boolean}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
@@ -66,7 +66,7 @@ export default function PreferencesForm() {
             <FormItem className="flex items-center gap-2">
               <FormControl>
                 <Checkbox 
-                  checked={field.value} 
+                  checked={field.value as boolean}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
@@ -82,7 +82,7 @@ export default function PreferencesForm() {
             <FormItem className="flex items-center gap-2">
               <FormControl>
                 <Checkbox 
-                  checked={field.value} 
+                  checked={field.value as boolean}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
@@ -98,7 +98,13 @@ export default function PreferencesForm() {
             <FormItem>
               <FormLabel>Number of Servings</FormLabel>
               <FormControl>
-                <Input type="number" {...field} min={1} max={10} />
+                <Input 
+                  type="number" 
+                  {...field} 
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  min={1} 
+                  max={10} 
+                />
               </FormControl>
             </FormItem>
           )}

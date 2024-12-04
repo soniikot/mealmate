@@ -1,11 +1,20 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { db } from "db";
 import { preferences, mealPlans } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { generateMealPlanWithGPT } from "./chatgpt";
 
+// Extend Express Request type to include user property
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: {
+      id: number;
+    };
+  }
+}
+
 export function registerRoutes(app: Express) {
-  app.get("/api/preferences", async (req, res) => {
+  app.get("/api/preferences", async (req: Request, res) => {
     if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
     
     const userPreferences = await db.query.preferences.findFirst({
@@ -15,7 +24,7 @@ export function registerRoutes(app: Express) {
     res.json(userPreferences);
   });
 
-  app.post("/api/preferences", async (req, res) => {
+  app.post("/api/preferences", async (req: Request, res) => {
     if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
     
     const userPreferences = await db.insert(preferences)
@@ -32,7 +41,7 @@ export function registerRoutes(app: Express) {
     res.json(userPreferences[0]);
   });
 
-  app.get("/api/meal-plan", async (req, res) => {
+  app.get("/api/meal-plan", async (req: Request, res) => {
     if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
     
     const currentWeekStart = new Date();
@@ -47,7 +56,7 @@ export function registerRoutes(app: Express) {
     res.json(mealPlan);
   });
 
-  app.post("/api/meal-plan/generate", async (req, res) => {
+  app.post("/api/meal-plan/generate", async (req: Request, res) => {
     if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
     
     const userPreferences = await db.query.preferences.findFirst({
