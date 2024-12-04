@@ -69,13 +69,15 @@ export function registerRoutes(app: Express) {
 
     const mealPlan = await generateMealPlanWithGPT(userPreferences);
     
+    const newMealPlan = {
+      user_id: req.user.id,
+      week_start: new Date(),
+      meals: mealPlan.meals || [],
+      shopping_list: mealPlan.shopping_list || []
+    };
+
     const savedMealPlan = await db.insert(mealPlans)
-      .values({
-        user_id: req.user.id,
-        week_start: new Date(),
-        meals: mealPlan.meals,
-        shopping_list: mealPlan.shopping_list
-      })
+      .values([newMealPlan])
       .returning();
     
     res.json(savedMealPlan[0]);

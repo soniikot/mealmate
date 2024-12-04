@@ -17,12 +17,13 @@ export default function PreferencesForm() {
     queryFn: fetchPreferences
   });
 
+  const defaultArrayValue = [] as string[];
   const form = useForm<Preferences>({
     resolver: zodResolver(insertPreferencesSchema),
     defaultValues: {
-      dietary_restrictions: existingPreferences?.dietary_restrictions as string[] ?? [],
-      allergies: existingPreferences?.allergies as string[] ?? [],
-      cuisine_preferences: existingPreferences?.cuisine_preferences as string[] ?? [],
+      dietary_restrictions: existingPreferences?.dietary_restrictions ?? defaultArrayValue,
+      allergies: existingPreferences?.allergies ?? defaultArrayValue,
+      cuisine_preferences: existingPreferences?.cuisine_preferences ?? defaultArrayValue,
       is_vegetarian: existingPreferences?.is_vegetarian ?? false,
       is_vegan: existingPreferences?.is_vegan ?? false,
       is_gluten_free: existingPreferences?.is_gluten_free ?? false,
@@ -100,8 +101,10 @@ export default function PreferencesForm() {
               <FormControl>
                 <Input 
                   type="number" 
-                  {...field} 
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  value={field.value?.toString() ?? ''}
+                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value, 10) : null)}
+                  onBlur={field.onBlur}
+                  name={field.name}
                   min={1} 
                   max={10} 
                 />
