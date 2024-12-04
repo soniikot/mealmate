@@ -15,11 +15,11 @@ export default function PreferencesForm() {
   const defaultArrayValue = [] as string[];
 
   const form = useForm<Partial<Preferences>>({
-    resolver: zodResolver(insertPreferencesSchema),
+    resolver: zodResolver(insertPreferencesSchema.partial()),
     defaultValues: preferences
   });
 
-  const onSubmit = (data: Preferences) => {
+  const onSubmit = (data: Partial<Preferences>) => {
     dispatch({ type: "SET_PREFERENCES", payload: data });
     toast({
       title: "Preferences updated",

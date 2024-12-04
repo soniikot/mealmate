@@ -52,7 +52,7 @@ export const recipes = pgTable("recipes", {
   instructions: json("instructions").$type<string[]>(),
   prep_time: integer("prep_time"),
   cook_time: integer("cook_time"),
-  image_url: text("image_url"),
+  image_url: text("image_url").notNull().default(''),
   tags: json("tags").$type<string[]>()
 });
 

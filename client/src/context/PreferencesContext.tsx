@@ -27,7 +27,7 @@ const initialPreferences: Partial<Preferences> = {
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
 
 // Reducer function
-function preferencesReducer(state: Preferences, action: PreferencesAction): Preferences {
+function preferencesReducer(state: Partial<Preferences>, action: PreferencesAction): Partial<Preferences> {
   switch (action.type) {
     case "SET_PREFERENCES":
       return {

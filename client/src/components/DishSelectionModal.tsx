@@ -14,7 +14,7 @@ interface DishSelectionModalProps {
 }
 
 // Mock data for now - will be replaced with actual API data
-const mockRecipes: Recipe[] = [
+const mockRecipes: Partial<Recipe>[] = [
   {
     id: 1,
     name: "Overnight Oats",
