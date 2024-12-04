@@ -1,8 +1,9 @@
-import type { Express, Request } from "express";
+import type { Express, Request, Response } from "express";
 import { db } from "db";
-import { preferences, mealPlans } from "@db/schema";
+import { preferences, mealPlans, users } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { generateMealPlanWithGPT } from "./chatgpt";
+import { registerUser, validateUser, requireAuth } from "./auth";
 
 // Extend Express Request type to include user property
 declare module 'express-serve-static-core' {
@@ -14,6 +15,47 @@ declare module 'express-serve-static-core' {
 }
 
 export function registerRoutes(app: Express) {
+  // Auth routes
+  app.post("/api/auth/register", async (req: Request, res: Response) => {
+    try {
+      const { username, email, password } = req.body;
+      const user = await registerUser(username, email, password);
+      req.session.userId = user.id;
+      res.json({ id: user.id, username: user.username, email: user.email });
+    } catch (error: any) {
+      if (error.code === '23505') { // Unique violation
+        res.status(400).json({ error: "Email or username already exists" });
+      } else {
+        res.status(500).json({ error: "Failed to register user" });
+      }
+    }
+  });
+
+  app.post("/api/auth/login", async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    const user = await validateUser(email, password);
+    
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    req.session.userId = user.id;
+    res.json({ id: user.id, username: user.username, email: user.email });
+  });
+
+  app.post("/api/auth/logout", (req: Request, res: Response) => {
+    req.session.destroy((err) => {
+      if (err) {
+        res.status(500).json({ error: "Failed to logout" });
+      } else {
+        res.json({ message: "Logged out successfully" });
+      }
+    });
+  });
+
+  // Protected routes
+  app.use("/api/preferences", requireAuth);
+  app.use("/api/meal-plan", requireAuth);
   app.get("/api/preferences", async (req: Request, res) => {
     if (!req.user?.id) return res.status(401).json({ error: "Unauthorized" });
     
