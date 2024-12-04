@@ -79,16 +79,35 @@ export function registerRoutes(app: Express) {
   app.put("/api/meal-plan", async (req: Request, res: Response) => {
     try {
       const mealPlanData = req.body;
-      const [updatedMealPlan] = await db
-        .insert(mealPlans)
-        .values({
-          week_start: new Date(),
-          meals: mealPlanData.meals,
-          shopping_list: mealPlanData.shopping_list
-        })
-        .returning();
-      
-      res.json(updatedMealPlan);
+      const existingMealPlan = await db.query.mealPlans.findFirst({
+        orderBy: (mealPlans, { desc }) => [desc(mealPlans.week_start)]
+      });
+
+      if (existingMealPlan) {
+        // Update existing meal plan
+        const [updatedMealPlan] = await db
+          .update(mealPlans)
+          .set({
+            meals: mealPlanData.meals,
+            shopping_list: mealPlanData.shopping_list
+          })
+          .where(eq(mealPlans.id, existingMealPlan.id))
+          .returning();
+        
+        res.json(updatedMealPlan);
+      } else {
+        // Create new meal plan if none exists
+        const [newMealPlan] = await db
+          .insert(mealPlans)
+          .values({
+            week_start: new Date(),
+            meals: mealPlanData.meals,
+            shopping_list: mealPlanData.shopping_list
+          })
+          .returning();
+        
+        res.json(newMealPlan);
+      }
     } catch (error) {
       console.error("Failed to update meal plan:", error);
       res.status(500).json({ error: "Failed to update meal plan" });

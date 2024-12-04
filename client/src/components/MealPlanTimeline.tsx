@@ -38,7 +38,7 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   const handleDishSelect = async (dishName: string) => {
     if (!selectedDay || !selectedMealType || !mealPlan) return;
 
-    const updatedMeals = mealPlan.meals ? [...mealPlan.meals] : [];
+    const updatedMeals = [...(mealPlan.meals || [])];
     const dayIndex = updatedMeals.findIndex(meal => meal.day === selectedDay);
 
     if (dayIndex === -1) {
@@ -56,12 +56,13 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
     }
 
     try {
-      await updateMealPlan({
+      const updatedMealPlan = {
         ...mealPlan,
-        meals: updatedMeals
-      });
+        meals: updatedMeals,
+        shopping_list: mealPlan.shopping_list || []
+      };
       
-      // Force a refetch of the meal plan data
+      await updateMealPlan(updatedMealPlan);
       await queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
       setIsModalOpen(false);
     } catch (error) {
