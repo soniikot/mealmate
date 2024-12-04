@@ -38,28 +38,30 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   const handleDishSelect = async (dishName: string) => {
     if (!selectedDay || !selectedMealType || !mealPlan) return;
 
-    const currentMeals = [...(mealPlan.meals || [])] as MealDay[];
-    const dayIndex = currentMeals.findIndex(meal => meal.day === selectedDay);
+    const updatedMeals = [...(mealPlan.meals || [])] as MealDay[];
+    const dayIndex = updatedMeals.findIndex(meal => meal.day === selectedDay);
 
     if (dayIndex === -1) {
-      currentMeals.push({
+      updatedMeals.push({
         day: selectedDay,
         breakfast: selectedMealType === "breakfast" ? dishName : "",
         lunch: selectedMealType === "lunch" ? dishName : "",
         dinner: selectedMealType === "dinner" ? dishName : ""
       });
     } else {
-      currentMeals[dayIndex] = {
-        ...currentMeals[dayIndex],
+      updatedMeals[dayIndex] = {
+        ...updatedMeals[dayIndex],
         [selectedMealType]: dishName
       };
     }
 
     try {
-      await updateMealPlan({
+      const updatedMealPlan = {
         ...mealPlan,
-        meals: currentMeals
-      });
+        meals: updatedMeals
+      };
+      
+      await updateMealPlan(updatedMealPlan);
       queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
       setIsModalOpen(false);
     } catch (error) {
