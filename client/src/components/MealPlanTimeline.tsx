@@ -56,8 +56,13 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   const handleDishSelect = async (dishName: string) => {
     if (!selectedDay || !selectedMealType || !mealPlan) return;
 
+    console.log('Selected dish:', dishName);
+    console.log('Current mealPlan:', mealPlan);
+
     const updatedMeals = mealPlan.meals ? [...mealPlan.meals] : [];
     const dayIndex = updatedMeals.findIndex((meal) => meal.day === selectedDay);
+    
+    console.log('Updated meals before update:', updatedMeals);
 
     if (dayIndex === -1) {
       updatedMeals.push({
@@ -74,10 +79,11 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
     }
 
     try {
-      await updateMealPlan({
+      const updatedMealPlan = await updateMealPlan({
         ...mealPlan,
         meals: updatedMeals
       });
+      console.log('Meal plan update response:', updatedMealPlan);
       await queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
       setIsModalOpen(false);
     } catch (error) {
@@ -89,6 +95,7 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
     <div className="space-y-4">
       {days.map((day) => {
         const dayMeals = mealPlan?.meals?.find((meal) => meal.day === day);
+        console.log('Day meals for', day, ':', dayMeals);
 
         return (
           <Card key={day} className="p-4">
