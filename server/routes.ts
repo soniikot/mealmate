@@ -55,8 +55,18 @@ export function registerRoutes(app: Express) {
     
     const newMealPlan = {
       week_start: new Date(),
-      meals: mealPlan.meals || [],
-      shopping_list: mealPlan.shopping_list || []
+      meals: (mealPlan.meals || []) as {
+        day: string;
+        breakfast: string;
+        lunch: string;
+        dinner: string;
+      }[],
+      shopping_list: (mealPlan.shopping_list || []) as {
+        item: string;
+        category: string;
+        quantity: number;
+        unit: string;
+      }[]
     };
 
     const savedMealPlan = await db.insert(mealPlans)

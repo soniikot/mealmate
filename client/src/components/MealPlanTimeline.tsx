@@ -35,27 +35,19 @@ export default function MealPlanTimeline({ mealPlan }: { mealPlan?: { meals: Mea
   const handleDishSelect = async (dishName: string) => {
     if (!selectedDay || !selectedMealType || !mealPlan) return;
 
-    const currentMeals = (mealPlan.meals || []) as Array<{
-      day: string;
-      breakfast: string;
-      lunch: string;
-      dinner: string;
-    }>;
-
-    const updatedMeals = [...currentMeals];
-    
-    const dayIndex = updatedMeals.findIndex(meal => meal.day === selectedDay);
+    const currentMeals = [...(mealPlan.meals || [])] as MealDay[];
+    const dayIndex = currentMeals.findIndex(meal => meal.day === selectedDay);
 
     if (dayIndex === -1) {
-      updatedMeals.push({
+      currentMeals.push({
         day: selectedDay,
         breakfast: selectedMealType === "breakfast" ? dishName : "",
         lunch: selectedMealType === "lunch" ? dishName : "",
         dinner: selectedMealType === "dinner" ? dishName : ""
       });
     } else {
-      updatedMeals[dayIndex] = {
-        ...updatedMeals[dayIndex],
+      currentMeals[dayIndex] = {
+        ...currentMeals[dayIndex],
         [selectedMealType]: dishName
       };
     }
@@ -63,9 +55,10 @@ export default function MealPlanTimeline({ mealPlan }: { mealPlan?: { meals: Mea
     try {
       await updateMealPlan({
         ...mealPlan,
-        meals: updatedMeals
+        meals: currentMeals
       });
       queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Failed to update meal plan:", error);
     }

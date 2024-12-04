@@ -4,7 +4,7 @@ import connectPgSimple from "connect-pg-simple";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
 import { createServer } from "http";
-import { requireAuth } from "./auth";
+
 
 const PostgresStore = connectPgSimple(session);
 
