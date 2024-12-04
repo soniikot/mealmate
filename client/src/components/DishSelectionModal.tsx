@@ -9,7 +9,7 @@ import type { Recipe } from "@db/schema";
 interface DishSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (dishName: string) => void;
+  onSelect: (dishName: string, ingredients: Array<{ item: string; amount: number; unit: string }>) => void;
   mealType: "breakfast" | "lunch" | "dinner";
 }
 
@@ -156,7 +156,9 @@ export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType
 
   const handleSelect = () => {
     if (!selectedDish?.name) return;
-    onSelect(selectedDish.name);
+    
+    // Pass both the dish name and ingredients
+    onSelect(selectedDish.name, selectedDish.ingredients || []);
     setSelectedDish(null);
     setSearchTerm("");
     onClose();

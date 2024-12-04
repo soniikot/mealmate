@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { usePreferences } from "../context/PreferencesContext";
 import { Button } from "@/components/ui/button";
@@ -6,10 +6,11 @@ import { Card } from "@/components/ui/card";
 import RecipeCard from "../components/RecipeCard";
 import MealPlanTimeline from "../components/MealPlanTimeline";
 import ShoppingList from "../components/ShoppingList";
-import { fetchCurrentMealPlan } from "../lib/api";
+import { fetchCurrentMealPlan, updateMealPlan } from "../lib/api";
 
 export default function Dashboard() {
   const { preferences } = usePreferences();
+  const queryClient = useQueryClient();
   const { data: mealPlan, isLoading } = useQuery({
     queryKey: ["mealPlan", preferences],
     queryFn: fetchCurrentMealPlan

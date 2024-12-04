@@ -53,17 +53,20 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
     setIsModalOpen(true);
   };
 
-  const handleDishSelect = async (dishName: string) => {
+  const handleDishSelect = async (
+    dishName: string,
+    ingredients: Array<{ item: string; amount: number; unit: string }>
+  ) => {
     if (!selectedDay || !selectedMealType) return;
 
     const currentMeals = mealPlan?.meals || [];
-    console.log('Current meals:', currentMeals);
-
+    const currentShoppingList = mealPlan?.shopping_list || [];
+    
+    // Update meals
     const updatedMeals = [...currentMeals];
     const dayIndex = updatedMeals.findIndex((meal) => meal.day === selectedDay);
     
     if (dayIndex === -1) {
-      // Create new day entry
       updatedMeals.push({
         day: selectedDay,
         breakfast: selectedMealType === "breakfast" ? dishName : "",
@@ -71,21 +74,40 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
         dinner: selectedMealType === "dinner" ? dishName : ""
       });
     } else {
-      // Update existing day
       updatedMeals[dayIndex] = {
         ...updatedMeals[dayIndex],
         [selectedMealType]: dishName
       };
     }
 
-    console.log('Updated meals:', updatedMeals);
+    // Update shopping list with new ingredients
+    const updatedShoppingList = [...currentShoppingList];
+    
+    ingredients.forEach(({ item, amount, unit }) => {
+      const existingItemIndex = updatedShoppingList.findIndex(
+        (listItem) => listItem.item.toLowerCase() === item.toLowerCase() && listItem.unit === unit
+      );
+
+      if (existingItemIndex >= 0) {
+        // Update quantity if item exists
+        updatedShoppingList[existingItemIndex].quantity += amount;
+      } else {
+        // Add new item
+        updatedShoppingList.push({
+          item,
+          category: "Ingredients",  // Default category
+          quantity: amount,
+          unit
+        });
+      }
+    });
 
     try {
       const updatedMealPlan = await updateMealPlan({
         meals: updatedMeals,
-        shopping_list: mealPlan?.shopping_list || []
+        shopping_list: updatedShoppingList
       });
-      console.log('Server response:', updatedMealPlan);
+      console.log('Updated meal plan:', updatedMealPlan);
       await queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
       setIsModalOpen(false);
     } catch (error) {
