@@ -14,7 +14,7 @@ export default function PreferencesForm() {
   const { preferences, dispatch } = usePreferences();
   const defaultArrayValue = [] as string[];
 
-  const form = useForm<Preferences>({
+  const form = useForm<Partial<Preferences>>({
     resolver: zodResolver(insertPreferencesSchema),
     defaultValues: preferences
   });

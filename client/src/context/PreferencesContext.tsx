@@ -8,19 +8,19 @@ type PreferencesAction =
 
 // Context type
 type PreferencesContextType = {
-  preferences: Preferences;
+  preferences: Partial<Preferences>;
   dispatch: React.Dispatch<PreferencesAction>;
 };
 
 // Initial state
-const initialPreferences: Preferences = {
+const initialPreferences: Partial<Preferences> = {
   dietary_restrictions: [],
   allergies: [],
   cuisine_preferences: [],
   is_vegetarian: false,
   is_vegan: false,
   is_gluten_free: false,
-  servings: 2,
+  servings: 2
 };
 
 // Create context

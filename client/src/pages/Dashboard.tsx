@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { usePreferences } from "../context/PreferencesContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import RecipeCard from "../components/RecipeCard";
