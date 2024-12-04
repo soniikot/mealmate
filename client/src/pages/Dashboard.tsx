@@ -70,7 +70,20 @@ export default function Dashboard() {
             {isLoading ? (
               <div>Loading...</div>
             ) : (
-              <ShoppingList items={mealPlan?.shopping_list as Array<{ item: string; category: string; quantity: number; unit: string; }> || []} />
+              <ShoppingList 
+                items={mealPlan?.shopping_list as Array<{ item: string; category: string; quantity: number; unit: string; }> || []}
+                onUpdateItems={async (items) => {
+                  try {
+                    await updateMealPlan({
+                      meals: mealPlan?.meals || [],
+                      shopping_list: items
+                    });
+                    await queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
+                  } catch (error) {
+                    console.error("Failed to update shopping list:", error);
+                  }
+                }}
+              />
             )}
           </Card>
         </div>
