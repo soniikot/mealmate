@@ -55,3 +55,49 @@ export async function generateMealPlanWithGPT(preferences: Preferences): Promise
     throw error;
   }
 }
+
+import type { Recipe } from "@db/schema";
+
+export async function generateRecipes(mealType: string, preferences: Preferences): Promise<Partial<Recipe>[]> {
+  const prompt = `
+    Generate 6 ${mealType} recipes that match these dietary preferences:
+    - Vegetarian: ${preferences.is_vegetarian}
+    - Vegan: ${preferences.is_vegan}
+    - Gluten Free: ${preferences.is_gluten_free}
+    - Dietary Restrictions: ${Array.isArray(preferences.dietary_restrictions) ? preferences.dietary_restrictions.join(', ') : ''}
+    - Allergies: ${Array.isArray(preferences.allergies) ? preferences.allergies.join(', ') : ''}
+    
+    For each recipe include:
+    - name
+    - description
+    - ingredients (with amounts and units)
+    - prep_time
+    - cook_time
+    - tags
+    
+    Format the response as JSON matching the Recipe type.
+  `;
+
+  try {
+    const response = await fetch(OPENAI_API_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: "You are a culinary expert that creates detailed, healthy recipes." },
+          { role: "user", content: prompt }
+        ]
+      })
+    });
+
+    const data = await response.json();
+    return JSON.parse(data.choices[0].message.content);
+  } catch (error) {
+    console.error("Error generating recipes:", error);
+    throw error;
+  }
+}

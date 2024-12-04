@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { db } from "db";
 import { preferences, mealPlans, users } from "@db/schema";
 import { eq } from "drizzle-orm";
-import { generateMealPlanWithGPT } from "./chatgpt";
+import { generateMealPlanWithGPT, generateRecipes } from "./chatgpt";
 import { registerUser, validateUser } from "./auth";
 
 export function registerRoutes(app: Express) {
@@ -112,6 +112,23 @@ export function registerRoutes(app: Express) {
     } catch (error) {
       console.error("Failed to update meal plan:", error);
       res.status(500).json({ error: "Failed to update meal plan" });
+    }
+  });
+
+  app.get("/api/recipes/:mealType", async (req: Request, res: Response) => {
+    try {
+      const { mealType } = req.params;
+      const userPreferences = await db.query.preferences.findFirst();
+      
+      if (!userPreferences) {
+        return res.status(400).json({ error: "Please set your preferences first" });
+      }
+
+      const recipes = await generateRecipes(mealType, userPreferences);
+      res.json(recipes);
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+      res.status(500).json({ error: "Failed to fetch recipes" });
     }
   });
 }
