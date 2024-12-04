@@ -56,10 +56,13 @@ export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px]" aria-describedby="meal-selection-description">
         <DialogHeader>
           <DialogTitle>Select {mealType.charAt(0).toUpperCase() + mealType.slice(1)}</DialogTitle>
         </DialogHeader>
+        <div id="meal-selection-description" className="sr-only">
+          Select a meal for your meal plan
+        </div>
         
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />

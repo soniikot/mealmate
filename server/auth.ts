@@ -1,4 +1,3 @@
-import { Request, Response, NextFunction } from "express";
 import { db } from "db";
 import { users } from "@db/schema";
 import { eq } from "drizzle-orm";
@@ -23,12 +22,4 @@ export async function validateUser(email: string, password: string) {
   if (!isValid) return null;
   
   return user;
-}
-
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.session.userId) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  req.user = { id: req.session.userId };
-  next();
 }
