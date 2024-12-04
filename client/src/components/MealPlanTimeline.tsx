@@ -17,19 +17,37 @@ type MealDay = {
 interface MealPlanTimelineProps {
   mealPlan?: {
     meals: MealDay[];
-    shopping_list: Array<{ item: string; category: string; quantity: number; unit: string; }>;
+    shopping_list: Array<{
+      item: string;
+      category: string;
+      quantity: number;
+      unit: string;
+    }>;
   };
 }
 
 export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const days = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
   const queryClient = useQueryClient();
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [selectedMealType, setSelectedMealType] = useState<"breakfast" | "lunch" | "dinner" | null>(null);
+  const [selectedMealType, setSelectedMealType] = useState<
+    "breakfast" | "lunch" | "dinner" | null
+  >(null);
 
-  const handleAddDish = (day: string, mealType: "breakfast" | "lunch" | "dinner") => {
+  const handleAddDish = (
+    day: string,
+    mealType: "breakfast" | "lunch" | "dinner",
+  ) => {
     setSelectedDay(day);
     setSelectedMealType(mealType);
     setIsModalOpen(true);
@@ -39,19 +57,19 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
     if (!selectedDay || !selectedMealType || !mealPlan) return;
 
     const updatedMeals = [...(mealPlan.meals || [])];
-    const dayIndex = updatedMeals.findIndex(meal => meal.day === selectedDay);
+    const dayIndex = updatedMeals.findIndex((meal) => meal.day === selectedDay);
 
     if (dayIndex === -1) {
       updatedMeals.push({
         day: selectedDay,
         breakfast: selectedMealType === "breakfast" ? dishName : "",
         lunch: selectedMealType === "lunch" ? dishName : "",
-        dinner: selectedMealType === "dinner" ? dishName : ""
+        dinner: selectedMealType === "dinner" ? dishName : "",
       });
     } else {
       updatedMeals[dayIndex] = {
         ...updatedMeals[dayIndex],
-        [selectedMealType]: dishName
+        [selectedMealType]: dishName,
       };
     }
 
@@ -59,23 +77,23 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
       const updatedMealPlan = {
         ...mealPlan,
         meals: updatedMeals,
-        shopping_list: mealPlan.shopping_list || []
+        shopping_list: mealPlan.shopping_list || [],
       };
-      
+
       await updateMealPlan(updatedMealPlan);
-      await queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
+      await queryClient.invalidateQueries({ queryKey: ["mealPlan"] });
       setIsModalOpen(false);
     } catch (error) {
       console.error("Failed to update meal plan:", error);
     }
   };
-  
+
   return (
     <div className="space-y-4">
       {days.map((day) => {
         const meals = mealPlan?.meals as MealDay[] | undefined;
         const dayMeals = meals?.find((meal) => meal.day === day);
-        
+
         return (
           <Card key={day} className="p-4">
             <div className="flex items-center justify-between">
@@ -84,7 +102,9 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
             <div className="grid grid-cols-3 gap-4 mt-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-muted-foreground">Breakfast</span>
+                  <span className="text-sm text-muted-foreground">
+                    Breakfast
+                  </span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -125,7 +145,7 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
           </Card>
         );
       })}
-      
+
       <DishSelectionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
