@@ -48,10 +48,12 @@ export default function DishSelectionModal({ isOpen, onClose, onSelect, mealType
   );
 
   const handleSelect = () => {
-    if (selectedDish?.name) {
-      onSelect(selectedDish.name);
-      onClose();
+    if (!selectedDish?.name) {
+      console.error("No dish selected");
+      return;
     }
+    onSelect(selectedDish.name);
+    onClose();
   };
 
   return (

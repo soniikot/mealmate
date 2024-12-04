@@ -12,7 +12,20 @@ export async function generateMealPlan() {
   return response.json();
 }
 
-export async function updateMealPlan(mealPlan: any) {
+export async function updateMealPlan(mealPlan: {
+  meals: Array<{
+    day: string;
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+  }>;
+  shopping_list: Array<{
+    item: string;
+    category: string;
+    quantity: number;
+    unit: string;
+  }>;
+}) {
   const response = await fetch("/api/meal-plan", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

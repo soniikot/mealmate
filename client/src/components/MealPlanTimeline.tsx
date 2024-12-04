@@ -7,10 +7,6 @@ import DishSelectionModal from "./DishSelectionModal";
 import { updateMealPlan } from "../lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 
-interface MealPlanTimelineProps {
-  mealPlan?: MealPlan;
-}
-
 type MealDay = {
   day: string;
   breakfast: string;
@@ -18,7 +14,14 @@ type MealDay = {
   dinner: string;
 };
 
-export default function MealPlanTimeline({ mealPlan }: { mealPlan?: { meals: MealDay[] } }) {
+interface MealPlanTimelineProps {
+  mealPlan?: {
+    meals: MealDay[];
+    shopping_list: Array<{ item: string; category: string; quantity: number; unit: string; }>;
+  };
+}
+
+export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const queryClient = useQueryClient();
   
