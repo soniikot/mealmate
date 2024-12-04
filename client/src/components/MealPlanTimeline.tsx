@@ -38,7 +38,7 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
   const handleDishSelect = async (dishName: string) => {
     if (!selectedDay || !selectedMealType || !mealPlan) return;
 
-    const updatedMeals = [...(mealPlan.meals || [])] as MealDay[];
+    const updatedMeals = mealPlan.meals ? [...mealPlan.meals] : [];
     const dayIndex = updatedMeals.findIndex(meal => meal.day === selectedDay);
 
     if (dayIndex === -1) {
@@ -56,13 +56,13 @@ export default function MealPlanTimeline({ mealPlan }: MealPlanTimelineProps) {
     }
 
     try {
-      const updatedMealPlan = {
+      await updateMealPlan({
         ...mealPlan,
         meals: updatedMeals
-      };
+      });
       
-      await updateMealPlan(updatedMealPlan);
-      queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
+      // Force a refetch of the meal plan data
+      await queryClient.invalidateQueries({ queryKey: ['mealPlan'] });
       setIsModalOpen(false);
     } catch (error) {
       console.error("Failed to update meal plan:", error);

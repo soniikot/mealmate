@@ -75,4 +75,23 @@ export function registerRoutes(app: Express) {
     
     res.json(savedMealPlan[0]);
   });
+
+  app.put("/api/meal-plan", async (req: Request, res: Response) => {
+    try {
+      const mealPlanData = req.body;
+      const [updatedMealPlan] = await db
+        .insert(mealPlans)
+        .values({
+          week_start: new Date(),
+          meals: mealPlanData.meals,
+          shopping_list: mealPlanData.shopping_list
+        })
+        .returning();
+      
+      res.json(updatedMealPlan);
+    } catch (error) {
+      console.error("Failed to update meal plan:", error);
+      res.status(500).json({ error: "Failed to update meal plan" });
+    }
+  });
 }
