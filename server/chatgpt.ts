@@ -90,14 +90,21 @@ export async function generateRecipes(mealType: string, preferences: Preferences
         messages: [
           { role: "system", content: "You are a culinary expert that creates detailed, healthy recipes." },
           { role: "user", content: prompt }
-        ]
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
       })
     });
 
     const data = await response.json();
-    return JSON.parse(data.choices[0].message.content);
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error("Invalid response from OpenAI API");
+    }
+    
+    const recipes = JSON.parse(data.choices[0].message.content);
+    return Array.isArray(recipes) ? recipes : [recipes];
   } catch (error) {
     console.error("Error generating recipes:", error);
-    throw error;
+    throw new Error("Failed to generate recipes");
   }
 }
