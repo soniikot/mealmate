@@ -121,6 +121,41 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  app.get("/api/preferences", async (req: Request, res: Response) => {
+    try {
+      const userPreferences = await db.query.preferences.findFirst();
+      res.json(userPreferences || {
+        dietary_restrictions: [],
+        allergies: [],
+        cuisine_preferences: [],
+        is_vegetarian: false,
+        is_vegan: false,
+        is_gluten_free: false,
+        servings: 2
+      });
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+      res.status(500).json({ error: "Failed to fetch preferences" });
+    }
+  });
+
+  app.post("/api/preferences", async (req: Request, res: Response) => {
+    try {
+      const data = req.body;
+      const [newPreferences] = await db.insert(preferences)
+        .values(data)
+        .onConflictDoUpdate({
+          target: preferences.id,
+          set: data
+        })
+        .returning();
+      res.json(newPreferences);
+    } catch (error) {
+      console.error("Error saving preferences:", error);
+      res.status(500).json({ error: "Failed to save preferences" });
+    }
+  });
+
   app.get("/api/recipes/:mealType", async (req: Request, res: Response) => {
     try {
       const { mealType } = req.params;

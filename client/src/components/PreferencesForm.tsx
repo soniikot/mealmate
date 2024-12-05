@@ -26,12 +26,36 @@ export default function PreferencesForm() {
     }
   });
 
-  const onSubmit = (data: Partial<Preferences>) => {
-    dispatch({ type: "SET_PREFERENCES", payload: data });
-    toast({
-      title: "Preferences updated",
-      description: "Your meal preferences have been saved successfully."
-    });
+  const onSubmit = async (data: Partial<Preferences>) => {
+    try {
+      dispatch({ type: "SET_PREFERENCES", payload: data });
+      
+      // Save to backend
+      const response = await fetch('/api/preferences', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save preferences');
+      }
+
+      toast({
+        title: "Success",
+        description: "Your meal preferences have been saved successfully.",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save preferences. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

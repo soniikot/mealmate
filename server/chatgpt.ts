@@ -59,24 +59,23 @@ export async function generateMealPlanWithGPT(preferences: Preferences): Promise
 import type { Recipe } from "@db/schema";
 
 export async function generateRecipes(mealType: string, preferences: Preferences): Promise<Partial<Recipe>[]> {
-  const prompt = `
-    Generate 6 ${mealType} recipes that match these dietary preferences:
-    - Vegetarian: ${preferences.is_vegetarian}
-    - Vegan: ${preferences.is_vegan}
-    - Gluten Free: ${preferences.is_gluten_free}
-    - Dietary Restrictions: ${Array.isArray(preferences.dietary_restrictions) ? preferences.dietary_restrictions.join(', ') : ''}
-    - Allergies: ${Array.isArray(preferences.allergies) ? preferences.allergies.join(', ') : ''}
-    
-    For each recipe include:
-    - name
-    - description
-    - ingredients (with amounts and units)
-    - prep_time
-    - cook_time
-    - tags
-    
-    Format the response as JSON matching the Recipe type.
-  `;
+  const prompt = `Generate 6 ${mealType} recipes as JSON array. Each recipe should match these preferences:
+${preferences.is_vegetarian ? '- Must be vegetarian' : ''}
+${preferences.is_vegan ? '- Must be vegan' : ''}
+${preferences.is_gluten_free ? '- Must be gluten-free' : ''}
+${preferences.dietary_restrictions?.length ? `- Must avoid: ${preferences.dietary_restrictions.join(', ')}` : ''}
+${preferences.allergies?.length ? `- Must not contain allergens: ${preferences.allergies.join(', ')}` : ''}
+
+Each recipe in the array should have this exact JSON structure:
+{
+  "name": "Recipe Name",
+  "description": "Brief description",
+  "ingredients": [{"item": "ingredient name", "amount": number, "unit": "g/ml/piece"}],
+  "prep_time": number (in minutes),
+  "cook_time": number (in minutes),
+  "tags": ["tag1", "tag2"],
+  "image_url": ""
+}`;
 
   try {
     const response = await fetch(OPENAI_API_ENDPOINT, {
