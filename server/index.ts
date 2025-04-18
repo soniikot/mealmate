@@ -5,7 +5,6 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
 import { createServer } from "http";
 
-
 const PostgresStore = connectPgSimple(session);
 
 function log(message: string) {
@@ -24,20 +23,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Session middleware
-app.use(session({
-  store: new PostgresStore({
-    conObject: {
-      connectionString: process.env.DATABASE_URL,
+app.use(
+  session({
+    store: new PostgresStore({
+      conObject: {
+        connectionString: process.env.DATABASE_URL,
+      },
+    }),
+    secret: process.env.SESSION_SECRET || "default_session_secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     },
-  }),
-  secret: process.env.SESSION_SECRET || 'default_session_secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-  }
-}));
+  })
+);
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -93,7 +94,7 @@ app.use((req, res, next) => {
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client
-  const PORT = 5000;
+  const PORT = 5137;
   server.listen(PORT, "0.0.0.0", () => {
     log(`serving on port ${PORT}`);
   });

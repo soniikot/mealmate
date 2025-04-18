@@ -1,9 +1,11 @@
-import type { Preferences, MealPlan } from "@db/schema";
+import type { Preferences, MealPlan, Recipe } from "@db/schema";
 
 const OPENAI_API_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
-export async function generateMealPlanWithGPT(preferences: Preferences): Promise<Partial<MealPlan>> {
-  const dietaryRestrictions = Array.isArray(preferences.dietary_restrictions) 
+export async function generateMealPlanWithGPT(
+  preferences: Preferences
+): Promise<Partial<MealPlan>> {
+  const dietaryRestrictions = Array.isArray(preferences.dietary_restrictions)
     ? preferences.dietary_restrictions.join(", ")
     : "";
   const allergies = Array.isArray(preferences.allergies)
@@ -33,15 +35,19 @@ export async function generateMealPlanWithGPT(preferences: Preferences): Promise
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a meal planning assistant that generates healthy and balanced meal plans." },
-          { role: "user", content: prompt }
-        ]
-      })
+          {
+            role: "system",
+            content:
+              "You are a meal planning assistant that generates healthy and balanced meal plans.",
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
     });
 
     if (!response.ok) {
@@ -56,15 +62,25 @@ export async function generateMealPlanWithGPT(preferences: Preferences): Promise
   }
 }
 
-import type { Recipe } from "@db/schema";
-
-export async function generateRecipes(mealType: string, preferences: Preferences): Promise<Partial<Recipe>[]> {
+export async function generateRecipes(
+  mealType: string,
+  preferences: Preferences
+): Promise<Partial<Recipe>[]> {
   const prompt = `Generate 6 ${mealType} recipes as JSON array. Each recipe should match these preferences:
-${preferences.is_vegetarian ? '- Must be vegetarian' : ''}
-${preferences.is_vegan ? '- Must be vegan' : ''}
-${preferences.is_gluten_free ? '- Must be gluten-free' : ''}
-${preferences.dietary_restrictions?.length ? `- Must avoid: ${preferences.dietary_restrictions.join(', ')}` : ''}
-${preferences.allergies?.length ? `- Must not contain allergens: ${preferences.allergies.join(', ')}` : ''}
+${preferences.is_vegetarian ? "- Must be vegetarian" : ""}
+${preferences.is_vegan ? "- Must be vegan" : ""}
+${preferences.is_gluten_free ? "- Must be gluten-free" : ""}
+${
+  Array.isArray(preferences.dietary_restrictions) &&
+  preferences.dietary_restrictions.length
+    ? `- Must avoid: ${preferences.dietary_restrictions.join(", ")}`
+    : ""
+}
+${
+  Array.isArray(preferences.allergies) && preferences.allergies.length
+    ? `- Must not contain allergens: ${preferences.allergies.join(", ")}`
+    : ""
+}
 
 Each recipe in the array should have this exact JSON structure:
 {
@@ -82,24 +98,28 @@ Each recipe in the array should have this exact JSON structure:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a culinary expert that creates detailed, healthy recipes." },
-          { role: "user", content: prompt }
+          {
+            role: "system",
+            content:
+              "You are a culinary expert that creates detailed, healthy recipes.",
+          },
+          { role: "user", content: prompt },
         ],
         temperature: 0.7,
-        max_tokens: 2000
-      })
+        max_tokens: 2000,
+      }),
     });
 
     const data = await response.json();
     if (!data.choices?.[0]?.message?.content) {
       throw new Error("Invalid response from OpenAI API");
     }
-    
+
     const recipes = JSON.parse(data.choices[0].message.content);
     return Array.isArray(recipes) ? recipes : [recipes];
   } catch (error) {
